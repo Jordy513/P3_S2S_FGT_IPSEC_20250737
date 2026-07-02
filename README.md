@@ -494,7 +494,6 @@ Algunos builds de FortiOS incluyen un widget en el Dashboard que resume el estad
 | 7 | [`07_forward_traffic_accept.png`](screenshots/07_forward_traffic_accept.png) | `Log & Report → Forward Traffic` mostrando el tráfico de PC1 hacia PC2 cruzando el túnel con acción `Accept`. |
 | 8 | [`08_ping_pc1_a_pc2.png`](screenshots/08_ping_pc1_a_pc2.png) | Ping exitoso desde PC1 (`20.25.37.130`) hacia PC2 (`20.25.37.2`) a través del túnel Site-to-Site. |
 | 9 | [`09_traceroute_pc1_a_pc2.png`](screenshots/09_traceroute_pc1_a_pc2.png) | Traceroute desde PC1 hacia PC2 mostrando el camino a través del túnel VPN. |
-| 10 | [`10_dashboard_vpn_widget.png`](screenshots/10_dashboard_vpn_widget.png) | Widget del Dashboard mostrando el resumen de túneles VPN activos. |
 
 ---
 
