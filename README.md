@@ -144,28 +144,28 @@ A diferencia de L2TP/IPSec (donde IPSec protege un túnel L2TP que a su vez aute
 El laboratorio implementa una VPN Site-to-Site entre dos redes LAN separadas por una nube que simula el ISP/Internet (`192.168.1.0/24`). Cada FortiGate actúa como gateway de su propia LAN y como extremo del túnel IPSec hacia el FortiGate remoto.
 
 ```
-                                    [ NET / ISP ]
-                                    192.168.1.0/24
+                                     [ NET / ISP ]
+                                    192.168.1.0/ 24
                                           │
                   ┌───────────────────────┴───────────────────────┐
                   │ port1: 192.168.1.10/24              port1: 192.168.1.20/24
-          ┌───────┴───────┐                             ┌───────┴───────┐
+          ┌───────┴───────┐                               ┌───────┴───────┐
           │  FortiGate1   │═══════════════════════════════│  FortiGate2   │
-          │   Sitio A     │   Túnel IPSec (IKEv1, DES-SHA1)│   Sitio B     │
-          │ VPN-a-FGT2    │◄──────────── PSK ─────────────►│ VPN-a-FGT1    │
-          └───────┬───────┘                             └───────┬───────┘
+          │   Sitio A     │ Túnel IPSec (IKEv1, DES-SHA1) │   Sitio B     │
+          │ VPN-a-FGT2    │◄──────────── PSK ────────────►│ VPN-a-FGT1    │
+          └───────┬───────┘                               └───────┬───────┘
                   │ port2: 20.25.37.129/25              port2: 20.25.37.1/25
                   │                                              │
-          ┌───────┴───────┐                             ┌───────┴───────┐
-          │      SW1      │                             │      SW2      │
-          └───────┬───────┘                             └───────┬───────┘
-                  │ e0/1                                        │ e0/2
-                  │ eth1                                        │ eth0
-          ┌───────┴───────┐                             ┌───────┴───────┐
-          │      PC1      │                             │      PC2      │
-          │ 20.25.37.130  │                             │  20.25.37.2   │
-          └───────────────┘                             └───────────────┘
-           20.25.37.128/25                                20.25.37.0/25
+          ┌───────┴───────┐                              ┌───────┴───────┐
+          │      SW1      │                              │      SW2      │
+          └───────┬───────┘                              └───────┬───────┘
+                  │ e0/1                                         │ e0/2
+                  │ eth1                                         │ eth0
+          ┌───────┴───────┐                              ┌───────┴───────┐
+          │      PC1      │                              │      PC2      │
+          │ 20.25.37.130  │                              │  20.25.37.2   │
+          └───────────────┘                              └───────────────┘
+           20.25.37.128/25                                 20.25.37.0/25
 
   ══════════════════════════════════════════════════════════════════
   Flujo de la conexión IPSec Site-to-Site:
