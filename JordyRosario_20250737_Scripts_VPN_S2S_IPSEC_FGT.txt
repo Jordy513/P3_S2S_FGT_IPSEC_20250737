@@ -1,0 +1,210 @@
+# ══════════════════════════════════════════════════════
+# FortiGate1 — Sitio A | VPN Site-to-Site IPSec Route-Based (IKEv1)
+# Jordy Rosario — 20250737 | Seguridad de Redes 2026-C-2
+# ══════════════════════════════════════════════════════
+
+# ─── PASO 1: Interfaces físicas ────────────────────────
+config system interface
+    edit "port1"
+        set mode static
+        set ip 192.168.1.10 255.255.255.0
+        set allowaccess ping https ssh
+        set role wan
+    next
+    edit "port2"
+        set mode static
+        set ip 20.25.37.129 255.255.255.128
+        set allowaccess ping http ssh
+        set role lan
+    next
+end
+
+# ─── PASO 2: Ruta por defecto hacia la nube NET ───────
+config router static
+    edit 1
+        set dst 0.0.0.0 0.0.0.0
+        set gateway 192.168.1.2
+        set device "port1"
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 3: IKEv1 Fase 1 — crea la interfaz virtual del túnel
+# ══════════════════════════════════════════════════════
+# net-device disable = modo Route-Based: el tráfico se dirige
+# al túnel mediante una ruta estática, no mediante una política
+# de tipo "ipsec" (Policy-Based).
+config vpn ipsec phase1-interface
+    edit "VPN-a-FGT2"
+        set interface "port1"
+        set ike-version 1
+        set peertype any
+        set net-device disable
+        set proposal des-sha1
+        set dhgrp 2
+        set remote-gw 192.168.1.20
+        set psksecret MiClaveVPN123
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 4: IKEv1 Fase 2 — selectores de tráfico a cifrar
+# ══════════════════════════════════════════════════════
+config vpn ipsec phase2-interface
+    edit "VPN-a-FGT2-p2"
+        set phase1name "VPN-a-FGT2"
+        set proposal des-sha1
+        set src-subnet 20.25.37.128 255.255.255.128
+        set dst-subnet 20.25.37.0 255.255.255.128
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 5: Ruta estática hacia la LAN remota vía el túnel
+# ══════════════════════════════════════════════════════
+# El "device" es la interfaz virtual del túnel, no una IP
+# de next-hop — así funciona el enrutamiento en Route-Based VPN.
+config router static
+    edit 2
+        set dst 20.25.37.0 255.255.255.128
+        set device "VPN-a-FGT2"
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 6: Políticas de firewall — obligatorias en ambos
+# sentidos, incluso con el túnel activo
+# ══════════════════════════════════════════════════════
+config firewall policy
+    edit 1
+        set name "LAN-a-VPN"
+        set srcintf "port2"
+        set dstintf "VPN-a-FGT2"
+        set srcaddr "all"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+    edit 2
+        set name "VPN-a-LAN"
+        set srcintf "VPN-a-FGT2"
+        set dstintf "port2"
+        set srcaddr "all"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+end
+
+# ─── PASO 7: Logging — necesario para verificar en Forward Traffic
+config log memory setting
+    set status enable
+end
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+# ══════════════════════════════════════════════════════
+# FortiGate2 — Sitio B | VPN Site-to-Site IPSec Route-Based (IKEv1)
+# Jordy Rosario — 20250737 | Seguridad de Redes 2026-C-2
+# ══════════════════════════════════════════════════════
+
+# ─── PASO 1: Interfaces físicas ────────────────────────
+config system interface
+    edit "port1"
+        set mode static
+        set ip 192.168.1.20 255.255.255.0
+        set allowaccess ping https ssh
+        set role wan
+    next
+    edit "port2"
+        set mode static
+        set ip 20.25.37.1 255.255.255.128
+        set allowaccess ping http ssh
+        set role lan
+    next
+end
+
+# ─── PASO 2: Ruta por defecto hacia la nube NET ───────
+config router static
+    edit 1
+        set dst 0.0.0.0 0.0.0.0
+        set gateway 192.168.1.2
+        set device "port1"
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 3: IKEv1 Fase 1 — espejo de la configuración de FGT1
+# ══════════════════════════════════════════════════════
+config vpn ipsec phase1-interface
+    edit "VPN-a-FGT1"
+        set interface "port1"
+        set ike-version 1
+        set peertype any
+        set net-device disable
+        set proposal des-sha1
+        set dhgrp 2
+        set remote-gw 192.168.1.10
+        set psksecret MiClaveVPN123
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 4: IKEv1 Fase 2 — selectores en sentido inverso
+# ══════════════════════════════════════════════════════
+config vpn ipsec phase2-interface
+    edit "VPN-a-FGT1-p2"
+        set phase1name "VPN-a-FGT1"
+        set proposal des-sha1
+        set src-subnet 20.25.37.0 255.255.255.128
+        set dst-subnet 20.25.37.128 255.255.255.128
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 5: Ruta estática hacia la LAN remota vía el túnel
+# ══════════════════════════════════════════════════════
+config router static
+    edit 2
+        set dst 20.25.37.128 255.255.255.128
+        set device "VPN-a-FGT1"
+    next
+end
+
+# ══════════════════════════════════════════════════════
+# PASO 6: Políticas de firewall — ambos sentidos
+# ══════════════════════════════════════════════════════
+config firewall policy
+    edit 1
+        set name "LAN-a-VPN"
+        set srcintf "port2"
+        set dstintf "VPN-a-FGT1"
+        set srcaddr "all"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+    edit 2
+        set name "VPN-a-LAN"
+        set srcintf "VPN-a-FGT1"
+        set dstintf "port2"
+        set srcaddr "all"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+end
+
+# ─── PASO 7: Logging ────────────────────────────────────
+config log memory setting
+    set status enable
+end
