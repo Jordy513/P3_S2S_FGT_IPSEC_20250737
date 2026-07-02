@@ -546,9 +546,9 @@ end
 
 ## 8. Video Demostrativo
 
-🎥 **[Ver demostración en YouTube](#)**
+🎥 **[Ver demostración en YouTube](https://youtu.be/62Xyf6umglE)**
 
-**Duración:** máximo 8 minutos
+**Duración:** 7:47
 
 **Contenido del video:**
 
