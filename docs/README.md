@@ -1,4 +1,4 @@
-# Documentación técnica — DMVPN Fase 2 con IKEv1
+# Documentación técnica — VPN Site-to-Site IPSec Route-Based con FortiGate (IKEv1)
 
 Este directorio contiene la documentación formal del laboratorio.
 
